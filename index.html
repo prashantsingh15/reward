@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hidden Reward 🎁</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px 12px;
+background:radial-gradient(circle at 20% 10%,#ffe3ef,#ffc2da 60%,#ff9fc4);font-family:'Baloo 2','Comic Sans MS',system-ui,sans-serif;color:#b0236a;overflow-x:hidden}
+h1{margin:0;font-size:clamp(26px,7vw,38px);font-weight:800;text-align:center;text-shadow:2px 2px 0 #fff}
+.stage{position:relative;width:min(92vw,400px);aspect-ratio:1}
+#wheelWrap{width:100%;height:100%;transition:transform 5s cubic-bezier(.12,.7,.1,1);filter:drop-shadow(0 8px 14px rgba(176,35,106,.35))}
+svg{width:100%;height:100%;display:block}
+.pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:34px solid #b0236a;z-index:3;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))}
+#spinBtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:22%;aspect-ratio:1;border-radius:50%;border:5px solid #fff;background:#ff4d97;color:#fff;font:800 clamp(14px,4vw,18px) 'Baloo 2',sans-serif;cursor:pointer;z-index:4;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+#spinBtn:disabled{opacity:.7;cursor:default}
+.pop{animation:pop .6s ease}
+@keyframes pop{0%{opacity:0}50%{opacity:1}}
+#result{display:none;background:#fff;border:4px solid #ff4d97;border-radius:24px;padding:14px 22px;text-align:center;font-weight:800;font-size:clamp(18px,5vw,24px);box-shadow:0 8px 20px rgba(176,35,106,.3);animation:bounce .7s ease}
+#result small{display:block;font-weight:600;font-size:14px;color:#e0559a}
+#again{display:none;border:none;background:#b0236a;color:#fff;padding:8px 20px;border-radius:20px;font:600 16px 'Baloo 2',sans-serif;cursor:pointer}
+@keyframes bounce{0%{transform:scale(.3)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
+</style>
+</head>
+<body>
+<h1>🎁 Hidden Reward 🎁</h1>
+<div class="stage">
+  <div class="pointer"></div>
+  <div id="wheelWrap"><svg id="svg" viewBox="0 0 400 400"></svg></div>
+  <button id="spinBtn">SPIN</button>
+</div>
+<div id="result">🎉 You win 🎉<br>Ice cream treat by Prashant 🍦<small>Enjoy! 💖</small></div>
+<button id="again">Spin again</button>
+
+<script>
+const N=8,C=200,R=190,SEG=360/N,NS='http://www.w3.org/2000/svg';
+const cols=['#ff8fb8','#ffc2da'];
+const svg=document.getElementById('svg'),wrap=document.getElementById('wheelWrap'),
+btn=document.getElementById('spinBtn'),res=document.getElementById('result'),again=document.getElementById('again');
+let rot=0,busy=false;
+const pt=(a,r)=>[C+r*Math.sin(a*Math.PI/180),C-r*Math.cos(a*Math.PI/180)];
+function el(t,a,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt)e.textContent=txt;return e}
+function draw(win){
+  svg.innerHTML='';
+  svg.appendChild(el('circle',{cx:C,cy:C,r:R+8,fill:'#fff'}));
+  for(let i=0;i<N;i++){
+    const a0=i*SEG,a1=a0+SEG,mid=a0+SEG/2,[x0,y0]=pt(a0,R),[x1,y1]=pt(a1,R);
+    const g=el('g',{});
+    const open=i===win;
+    g.appendChild(el('path',{d:`M${C} ${C}L${x0} ${y0}A${R} ${R} 0 0 1 ${x1} ${y1}Z`,fill:open?'#fff7c2':cols[i%2],stroke:'#fff',
+      'stroke-width':3}));
+    if(open){
+      g.setAttribute('class','pop');
+      const [tx,ty]=pt(mid,R*0.68);
+      g.appendChild(el('text',{x:tx,y:ty,'font-size':44,'text-anchor':'middle','dominant-baseline':'middle',transform:`rotate(${mid-0} ${tx} ${ty})`},'🍦'));
+      const [wx,wy]=pt(mid,R*0.38);
+      g.appendChild(el('text',{x:wx,y:wy,'font-size':14,'font-weight':800,fill:'#b0236a','text-anchor':'middle','dominant-baseline':'middle',transform:`rotate(${mid} ${wx} ${wy})`},'YOU WIN!'));
+    }else{
+      g.appendChild(el('text',{x:C+58,y:C+1,'font-size':13,'font-weight':800,fill:'#fff','dominant-baseline':'middle',
+        transform:`rotate(${mid-90} ${C} ${C})`,style:'font-family:Baloo 2,sans-serif'},'Hidden Reward'));
+      g.appendChild(el('text',{x:C+172,y:C+1,'font-size':16,'dominant-baseline':'middle','text-anchor':'middle',
+        transform:`rotate(${mid-90} ${C} ${C})`},'🎁'));
+    }
+    svg.appendChild(g);
+  }
+  svg.appendChild(el('circle',{cx:C,cy:C,r:R,fill:'none',stroke:'#b0236a','stroke-width':4}));
+  for(let i=0;i<N;i++){const [x,y]=pt(i*SEG,R+1);svg.appendChild(el('circle',{cx:x,cy:y,r:5,fill:'#fff',stroke:'#b0236a','stroke-width':2}))}
+}
+draw(-1);
+btn.onclick=()=>{
+  if(busy)return;busy=true;btn.disabled=true;res.style.display='none';again.style.display='none';
+  draw(-1);
+  rot+=360*6+Math.floor(Math.random()*360);
+  wrap.style.transform=`rotate(${rot}deg)`;
+};
+wrap.addEventListener('transitionend',e=>{
+  if(e.target!==wrap||!busy)return;
+  const ang=(360-(rot%360))%360,win=Math.floor(ang/SEG);
+  draw(win);
+  res.style.display='block';again.style.display='block';busy=false;
+});
+again.onclick=()=>{res.style.display='none';again.style.display='none';draw(-1);btn.disabled=false};
+</script>
+</body>
+</html>
